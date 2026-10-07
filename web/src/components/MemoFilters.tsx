@@ -79,6 +79,14 @@ const FILTER_CONFIGS: Record<FilterFactor, FilterConfig> = {
     icon: MapPinIcon,
     getLabel: (_, t) => t("memo.filters.has-location"),
   },
+  "campus.type": {
+    icon: SearchIcon,
+    getLabel: (value, t) => (value === "FOUND" ? t("campus.type-found") : t("campus.type-lost")),
+  },
+  "campus.status": {
+    icon: CheckCircleIcon,
+    getLabel: (value, t) => (value === "RETURNED" ? t("campus.status-returned") : t("campus.status-pending")),
+  },
 };
 
 interface FilterChipProps {

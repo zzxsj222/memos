@@ -1,7 +1,7 @@
 {
-  "name": "Memos",
-  "short_name": "Memos",
-  "description": "Your own timeline for quick notes, private by default.",
+  "name": "校园失物招领",
+  "short_name": "失物招领",
+  "description": "面向高校的轻量级失物招领平台，按地点、时间和状态找到你丢的东西。",
   "icons": [
     { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }

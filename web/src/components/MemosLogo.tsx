@@ -22,7 +22,9 @@ function MemosLogo(props: Props) {
   const { collapsed, compact, size = "md" } = props;
   const scale = COMPACT_SCALE[size];
   const { generalSetting: instanceGeneralSetting } = useInstance();
-  const title = instanceGeneralSetting.customProfile?.title || "Memos";
+  // Falls back to the fork's own name; an instance that sets a custom profile
+  // title keeps using it, so a school can brand the deployment for itself.
+  const title = instanceGeneralSetting.customProfile?.title || "校园失物招领";
   const avatarUrl = instanceGeneralSetting.customProfile?.logoUrl || "/full-logo.webp";
 
   return (

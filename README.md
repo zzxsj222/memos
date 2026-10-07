@@ -1,77 +1,111 @@
-> ✨ Featured sponsor: [CodeRabbit — Industry-leading AI code reviews](https://coderabbit.link/usememos).
+# 校园失物招领（Campus Lost & Found）
 
-# Memos
+> 一个面向高校的轻量级失物招领平台，基于开源项目 [usememos/memos](https://github.com/usememos/memos)（MIT 协议）改造。
 
-<img src="./web/public/logo.webp" alt="" width="96" align="right">
+**捡到东西的人 30 秒发一条，丢了东西的人按楼栋和时间找回来。**
 
-**Your thoughts, your data, shared on your terms.**
+微信群刷屏、消息沉底、公告栏贴纸条——校园失物招领的真正问题不是"没人愿意帮忙"，而是**信息没有被结构化**。本平台把每一条失物/招领信息变成一条带地点、类型和状态的记录，可以被检索、被筛选、被追踪到"已归还"。
 
-Memos is a timeline for your notes, and it belongs to you. Write in Markdown, post in seconds, and choose who sees each memo: just you, the people you invite, or anyone with the link.
+---
 
-**[Run with Docker](#quick-start)** · **[Try the live demo](https://demo.usememos.com/)** · [Read the docs](https://usememos.com/docs)
+## 它和原项目的关系
 
-[![GitHub stars](https://img.shields.io/github/stars/usememos/memos?style=flat-square&logo=github&label=Stars)](https://github.com/usememos/memos)
-[![Latest release](https://img.shields.io/github/v/release/usememos/memos?style=flat-square&label=Release)](https://github.com/usememos/memos/releases)
-[![Docker pulls](https://img.shields.io/docker/pulls/neosmemo/memos?style=flat-square&logo=docker)](https://hub.docker.com/r/neosmemo/memos)
-[![MIT license](https://img.shields.io/github/license/usememos/memos?style=flat-square)](LICENSE)
+本项目是 [memos](https://github.com/usememos/memos) 的 fork。memos 是一个轻量级自托管笔记/短动态工具，Go + React 实现，MIT 协议，单个二进制即可运行、不依赖外部数据库。
 
-<img src="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/demo.png" alt="The Memos timeline with a memo composer and recent memos" height="512" />
+我们保留了它全部的后端、API 与数据模型，在其上叠加了一套校园场景的发布与筛选入口。**哪些是原项目的、哪些是我们新增的**，在 [CAMPUS.md](./CAMPUS.md) 里有逐项对照表（这也是 MIT 协议对衍生作品的材料要求）。
 
-## Why Memos?
+| | 原项目 memos | 本项目 |
+| --- | --- | --- |
+| 定位 | 通用个人笔记/时间线 | 校园失物招领信息流 |
+| 发帖形态 | 无标题、无分类，随手记录 | 结构化表单：类型、物品、地点、时间、状态 |
+| 信息组织 | 标签 + 全文搜索 | 在此基础上叠加「寻物/招领」「待认领/已归还」「地点」三类校园维度 |
+| 检索方式 | 标签、日期、属性筛选 | 首页一键切换校园筛选，可与原有筛选叠加 |
+| 数据库结构 | — | **未改动**，与上游兼容 |
 
-- **Write first** — Save a thought without choosing a title or folder. Memos are written in Markdown and can include images and files.
-- **Find it later** — Search, filter by tag, or look back through any day on the timeline. Pin what matters and save the filters you reuse as views.
-- **Yours to keep** — Self-host Memos with [zero telemetry](https://usememos.com/features/data-ownership), [MIT-licensed source](LICENSE), and a full export of your memos.
-- **Share when you choose** — New memos are private. Make one visible to signed-in users or public when you want to share it.
+## 核心能力
 
-[Explore all features →](https://usememos.com/features)
+- **结构化发布**：选「我丢了东西 / 我捡到东西」，填物品、地点、时间，自动生成一条带标签的备忘
+- **按楼栋筛选**：地点自动变成一个 `#地点/三教一楼` 标签，可按位置浏览
+- **状态闭环**：待认领 → 已归还，一眼看出哪些已经找回
+- **搜索与标签**：复用 memos 原生的标签体系与全文搜索，中文分词检索可用
+- **隐私保护**：支持实名/匿名两种发布模式，匿名发布不在正文公开联系方式
+- **数据自治**：部署在学校自己的服务器上，零遥测，支持全量数据导出——数据不出校
 
-## Quick Start
+## 快速开始
 
-Run Memos with Docker:
+### 方式一：Docker（推荐）
 
 ```bash
+docker build -t campus-lost-found .
+
 docker run -d \
-  --name memos \
+  --name campus-lost-found \
   -p 5230:5230 \
-  -v ~/.memos:/var/opt/memos \
-  neosmemo/memos:stable
+  -v ~/.campus-lost-found:/var/opt/memos \
+  campus-lost-found
 ```
 
-Other install options are in the [deployment guide](https://usememos.com/docs/deploy).
+打开 `http://localhost:5230`，首次访问创建管理员账号，然后在「设置 → 系统 → 自定义服务器」里把站点名改成你学校的名字。
 
-Releases use `YY.MM`, with optional point releases such as `26.09.1` and release
-candidates such as `26.09-rc.1`. Calendar release tags have no `v` prefix. The Docker `stable` tag follows stable releases;
-`canary` follows development builds. If upgrading from a release before v0.31.0,
-run [v0.31.0](https://github.com/usememos/memos/releases/tag/v0.31.0) successfully.
-See the [upgrade requirements](store/migration/README.md) for earlier versions.
+### 方式二：从源码构建
 
-## Web Clipper
+需要 Go 1.27+ 与 Node.js 24+（含 pnpm）。
 
-Save pages, selections, and images from your browser straight into Memos as source-linked Markdown. Get the [Memos Web Clipper](https://usememos.com/web-clipper) for [Chrome](https://chromewebstore.google.com/detail/memos-web-clipper/nebaoebnljalfegiidibihhkebeiklbl) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/memos-web-clipper/).
+```bash
+# 1. 构建前端（产物会被打进 Go 二进制）
+cd web && pnpm install && pnpm release && cd ..
 
-## Sponsors
+# 2. 编译并运行
+go run -buildversion=true ./cmd/memos --port 8081
+```
 
-<p>
-  <a href="https://coderabbit.link/usememos" target="_blank" rel="noopener"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/sponsors/coderabbit/white-typemark.svg" /><img src="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/sponsors/coderabbit/orange-typemark.svg" alt="CodeRabbit — Cut code review time and bugs in half" height="40" align="middle" /></picture></a>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://ssdnodes.com/?utm_source=memos&utm_medium=sponsor" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/sponsors/ssd-nodes.svg" alt="SSD Nodes — Affordable VPS hosting for self-hosters" height="72" align="middle" /></a>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.testmuai.com/?utm_medium=sponsor&utm_source=memos" target="_blank" rel="noopener"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/sponsors/testmuai/white.png" /><img src="https://raw.githubusercontent.com/usememos/.github/refs/heads/main/assets/sponsors/testmuai/black.png" alt="TestMu AI — The world’s first full-stack Agentic AI Quality Engineering platform" height="30" align="middle" /></picture></a>
-</p>
+单二进制产物：
 
-Love Memos? [Sponsor the project on GitHub](https://github.com/sponsors/usememos).
+```bash
+go build -o campus-lost-found ./cmd/memos
+./campus-lost-found --port 5230
+```
 
-## Get Help
+开发模式（前后端分离，前端 3001 端口代理到后端 8081）：
 
-Read the [docs](https://usememos.com/docs), join [Discord](https://discord.gg/tfPJa4UmAv), or ask in [GitHub Discussions](https://github.com/usememos/memos/discussions). Found a bug or have an idea? [Open an issue](https://github.com/usememos/memos/issues/new/choose). To contribute, see the [contributing guide](https://usememos.com/docs/development/contributing).
+```bash
+# 终端 1
+go run ./cmd/memos --port 8081
 
-## Star History
+# 终端 2
+cd web && pnpm dev
+```
 
-<a href="https://www.star-history.com/?repos=usememos%2Fmemos&amp;type=date&amp;legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=usememos/memos&amp;type=date&amp;theme=dark&amp;legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=usememos/memos&amp;type=date&amp;legend=top-left" />
-    <img alt="Memos star history chart" src="https://api.star-history.com/chart?repos=usememos/memos&amp;type=date&amp;legend=top-left" />
-  </picture>
-</a>
+## 使用说明
+
+1. 用学校邮箱或管理员分配的账号登录
+2. 在首页顶部的「校园失物招领」条上点「发布失物/招领」
+3. 选择类型 → 填物品名称与地点（这两项必填）→ 补充描述、时间、状态
+4. 发布后可在首页用「我丢了东西 / 我捡到东西 / 待认领 / 已归还」一键筛选
+5. 认领成功后，编辑这条备忘把状态改成「已归还」
+
+## 项目结构
+
+```
+cmd/          命令行入口
+server/       HTTP 服务与 API 实现
+core/         领域逻辑（含 memo payload 组装）
+store/        数据访问层与数据库迁移
+proto/        Protobuf 定义（本项目未修改）
+filter/       CEL 筛选编译器
+web/          前端（React 19 + Vite + Tailwind）
+  src/lib/campus.ts                     校园领域模型（单一事实来源）
+  src/components/Campus/                校园发布弹窗与筛选入口
+scripts/      辅助脚本
+```
+
+## 文档
+
+- [CAMPUS.md](./CAMPUS.md) —— 改造说明：与上游的逐项对照、设计取舍、已知限制与后续路线
+- [校园失物招领平台-项目策划书.md](../校园失物招领平台-项目策划书.md) —— 面向双创大赛的完整策划书
+
+## 协议与致谢
+
+本项目基于 [usememos/memos](https://github.com/usememos/memos) 改造，遵循 [MIT 协议](./LICENSE)。原始版权归 memos 及其贡献者所有；本 fork 新增部分的版权归本项目作者所有。
+
+如果你只想要一个通用笔记工具，请直接使用上游项目；本项目只针对校园失物招领这一个场景做减法与加法。

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import CampusBar from "@/components/Campus/CampusBar";
 import MemoEditor from "@/components/MemoEditor";
 import { deriveDefaultCreateTimeFromFilters } from "@/components/MemoEditor/utils/deriveDefaultCreateTime";
 import MemoView from "@/components/MemoView";
@@ -45,6 +46,7 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-full bg-background text-foreground">
+      <CampusBar />
       <NewMemoProvider>
         <PagedMemoList
           renderer={(memo: Memo, { compact }) => (

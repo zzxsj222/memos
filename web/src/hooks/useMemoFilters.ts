@@ -4,6 +4,7 @@ import { type MemoTimeBasis, useView } from "@/contexts/ViewContext";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useMemoViews } from "@/hooks/useUserQueries";
 import { buildTimestampRangeFilter, getLocalDayTimestampRange, getTimeBasisField } from "@/lib/calendar-utils";
+import { CAMPUS_STATUS_TAG, CAMPUS_TYPE_TAG } from "@/lib/campus";
 import { combineCELFilters } from "@/lib/cel-filter";
 import { getMemoViewId } from "@/lib/memo-views";
 import { buildMemoCreatorFilter, getVisibilityName } from "@/lib/resource-names";
@@ -68,6 +69,14 @@ export const buildMemoFilter = ({
       conditions.push(`has_code`);
     } else if (filter.factor === "property.hasLocation") {
       conditions.push(`has_location`);
+    } else if (filter.factor === "campus.type") {
+      // Campus facets are tag predicates: the type and status a poster picked are
+      // already in the memo's tags, so filtering needs no new index or column.
+      const tag = filter.value === "FOUND" ? CAMPUS_TYPE_TAG.FOUND : CAMPUS_TYPE_TAG.LOST;
+      conditions.push(`tag in [${escapeFilterValue(tag)}]`);
+    } else if (filter.factor === "campus.status") {
+      const tag = filter.value === "RETURNED" ? CAMPUS_STATUS_TAG.RETURNED : CAMPUS_STATUS_TAG.PENDING;
+      conditions.push(`tag in [${escapeFilterValue(tag)}]`);
     } else if (filter.factor === "displayTime") {
       const range = getLocalDayTimestampRange(filter.value);
       if (range) {

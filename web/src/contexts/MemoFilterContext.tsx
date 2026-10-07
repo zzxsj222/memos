@@ -12,7 +12,11 @@ export type FilterFactor =
   | "property.hasLink"
   | "property.hasTaskList"
   | "property.hasCode"
-  | "property.hasLocation";
+  | "property.hasLocation"
+  // Campus facets. They resolve to tag predicates, so a campus board narrows
+  // through the same index the tag system already maintains.
+  | "campus.type"
+  | "campus.status";
 
 export interface MemoFilter {
   factor: FilterFactor;
